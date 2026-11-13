@@ -175,33 +175,37 @@ class Group extends Tag
 	 */
 	public function wrapField($field)
 	{
-		$label = $this->getLabel($field);
-		$help = $this->getHelp();
-		if ($field->isCheckable() &&
-			in_array($this->app['former']->framework(), ['TwitterBootstrap4', 'TwitterBootstrap5'])
-		) {
-			$wrapperClass = null;
-			if ($this->app['former']->framework() === 'TwitterBootstrap4') {
-				$wrapperClass = $field->isInline() ? 'form-check form-check-inline' : 'form-check';
-			}
-			if ($this->app['former']->getErrors($field->getName())) {
-				$hiddenInput = Input::create('hidden')->addClass('form-check-input is-invalid');
-				$help = $hiddenInput.$help;
-			}
-			$help = $help ? Element::create('div', $help)->addClass($wrapperClass) : '';
-		}
-		$withFloatingLabel = $field->withFloatingLabel();
+		$fieldName = $field->getName();
 
-		$field = $this->prependAppend($field);
-		$field .= $help;
+        // generate the label for the field
+        $label = $this->getLabel($field);
 
-		if ($withFloatingLabel &&
-			$this->app['former']->framework() === 'TwitterBootstrap5'
-		) {
-			return $this->wrapWithFloatingLabel($field, $label);
-		}
+        // turn off the required attribute on the field
+        $field->required(false);
 
-		return $this->wrap($field, $label);
+        // get the tooltip
+        $help = $this->getHelp();
+        if ($help) {
+            // if we have a tooltip, we need to set some attributes on it and the field
+            $help->setAttribute('id', $fieldName . '_tooltip');
+            $field->setAttribute('aria-describedby', $fieldName . '_tooltip');
+        }
+
+
+        // get the errors
+        $errors = $this->getErrors();
+        if ($errors) {
+            $errors = Element::create('div', $errors)->class('invalid-feedback')->id($fieldName . '_error');
+            $field->setAttribute('aria-invalid', 'true')->setAttribute('aria-errormessage', $fieldName . '_error');
+        }
+
+        // handle the prepend append stuff
+        $field = $this->prependAppend($field);
+
+        // field is the help, then the field, then any errors
+        $field = $help . $field . $errors;
+
+        return $this->wrap($field, $label);
 	}
 
 	////////////////////////////////////////////////////////////////////
@@ -523,16 +527,16 @@ class Group extends Tag
 	 */
 	protected function getHelp()
 	{
-		$inline = Arr::get($this->help, 'inline');
-		$block  = Arr::get($this->help, 'block');
+        $inline = Arr::get($this->help, 'inline');
+        $block  = Arr::get($this->help, 'block');
 
-		// Replace help text with error if any found
-		$errors = $this->app['former']->getErrors();
-		if ($errors and $this->app['former']->getOption('error_messages')) {
-			$inline = $this->app['former.framework']->createValidationError($errors);
-		}
+        $helpMessages = Arr::flatten([$inline, $block]);
 
-		return implode('', array($inline, $block));
+        if (empty($helpMessages)) {
+            return '';
+        }
+
+        return $helpMessages[0];
 	}
 
 	/**
