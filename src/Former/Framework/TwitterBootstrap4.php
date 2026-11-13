@@ -338,7 +338,7 @@ class TwitterBootstrap4 extends Framework implements FrameworkInterface
 	 */
 	public function createHelp($text, $attributes = array())
 	{
-		return Element::create('small', $text, $attributes)->addClass('text-muted');
+		return Element::create('p', $text, $attributes)->addClass('help-block');
 	}
 
 	/**

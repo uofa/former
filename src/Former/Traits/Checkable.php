@@ -424,6 +424,12 @@ abstract class Checkable extends Field
 			}
 
 			$wrapperClass = $this->inline ? 'form-check form-check-inline' : 'form-check';
+
+			if (isset($field->attributes['disabled']) || in_array('disabled', $field->attributes)) {
+                $wrapperClass .= ' check-disabled';
+                $element = Element::create('div', $element);
+            }
+
 			if ($this->app['former']->framework() === 'TwitterBootstrap5' &&
 				$this->isOfType('switch', 'switches')
 			) {
