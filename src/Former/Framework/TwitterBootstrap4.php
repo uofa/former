@@ -270,11 +270,11 @@ class TwitterBootstrap4 extends Framework implements FrameworkInterface
 	public function getLabelClasses()
 	{
 		if ($this->app['former.form']->isOfType('horizontal')) {
-			return array('col-form-label', $this->labelWidth);
+			return array('control-label', $this->labelWidth);
 		} elseif ($this->app['former.form']->isOfType('inline')) {
 			return array('sr-only');
 		} else {
-			return array('col-form-label');
+			return array('control-label');
 		}
 	}
 
